@@ -4,7 +4,7 @@ export interface MockTest {
   id: number;
   title: string;
   total_questions: number;
-  file_url: string;
+  file_url?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -44,10 +44,7 @@ export const mockTestsApi = {
 
       const response = await apiClient.post<MockTest>(
         "/bulk-upload/mock-test",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        formData
       );
       return response.data;
     } catch (error) {

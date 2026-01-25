@@ -133,9 +133,10 @@ export default function MockTestManager() {
       fetchMockTests();
     } catch (error: any) {
       console.error(error);
-      toast.error(
-        editingId ? "Failed to update mock test" : "Failed to create mock test"
-      );
+      const errorMessage = error.response?.data?.detail || 
+                          error.response?.data?.message || 
+                          (editingId ? "Failed to update mock test" : "Failed to create mock test");
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -365,16 +366,20 @@ export default function MockTestManager() {
                             </span>
                           </TableCell>
                           <TableCell className="text-sm text-gray-600 dark:text-muted-foreground py-3">
-                            <button
-                              onClick={() => handleDownload(test.file_url)}
-                              className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
-                              title="Download file"
-                            >
-                              <Download className="h-4 w-4" />
-                              <span className="text-xs truncate max-w-[150px]">
-                                {getFileName(test.file_url)}
-                              </span>
-                            </button>
+                            {test.file_url ? (
+                              <button
+                                onClick={() => handleDownload(test.file_url!)}
+                                className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
+                                title="Download file"
+                              >
+                                <Download className="h-4 w-4" />
+                                <span className="text-xs truncate max-w-[150px]">
+                                  {getFileName(test.file_url)}
+                                </span>
+                              </button>
+                            ) : (
+                              <span className="text-xs text-gray-400 dark:text-muted-foreground">No file</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-right py-3">
                             <div className="flex justify-end gap-2">

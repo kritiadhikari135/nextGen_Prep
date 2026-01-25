@@ -36,6 +36,7 @@ class MockTestOut(BaseModel):
     id: int
     title: str
     total_questions: int
+    file_url: str = None
 
     class Config:
         from_attributes = True

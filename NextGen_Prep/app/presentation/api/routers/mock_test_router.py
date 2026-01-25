@@ -22,6 +22,7 @@ async def get_all_mock_tests(
                 id=mt.id,
                 title=mt.title,
                 total_questions=len(mt.questions) if mt.questions else 0,
+                file_url=mt.file_url,
             )
             for mt in mock_tests
         ]
@@ -43,6 +44,7 @@ async def get_mock_test(
             id=mock_test.id,
             title=mock_test.title,
             total_questions=len(mock_test.questions) if mock_test.questions else 0,
+            file_url=mock_test.file_url,
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -75,6 +77,7 @@ async def update_mock_test(
             id=mock_test.id,
             title=mock_test.title,
             total_questions=len(mock_test.questions) if mock_test.questions else 0,
+            file_url=mock_test.file_url,
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

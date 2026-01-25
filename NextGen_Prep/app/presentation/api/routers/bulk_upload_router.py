@@ -167,6 +167,7 @@ async def bulk_upload_mock_test(
                 id=mock_test.id,
                 title=mock_test.title,
                 total_questions=len(mock_test.questions),
+                file_url=mock_test.file_url,
             )
         except ValidationError as e:
             logger.warning(f"Schema validation error: {e}")
