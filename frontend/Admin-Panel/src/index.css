@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Dark premium theme */
+    --background: 222 47% 4%;
+    --background-secondary: 222 47% 6%;
+    --background-tertiary: 222 47% 9%;
+    --foreground: 0 0% 100%;
+    
+    /* Card backgrounds with glassmorphism */
+    --card: 0 0% 12%;
+    --card-glass: 0 0% 8%;
+    --card-foreground: 0 0% 100%;
+    
+    --popover: 222 47% 6%;
+    --popover-foreground: 0 0% 100%;
+    
+    /* Vibrant accent colors */
+    --primary: 217 91% 60%;
+    --primary-glow: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 142 71% 45%;
+    --secondary-glow: 173 80% 40%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent-purple: 271 91% 65%;
+    --accent-purple-glow: 271 91% 55%;
+    
+    --accent-pink: 330 81% 60%;
+    --accent-pink-glow: 330 81% 50%;
+    
+    --muted: 215 16% 47%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 217 91% 60%;
+    
+    --radius: 1rem;
+    
+    /* Text colors */
+    --text-primary: 0 0% 100%;
+    --text-secondary: 214 32% 82%;
+    --text-subtle: 215 16% 64%;
+    
+    /* Gradient stops */
+    --gradient-blue-start: 217 91% 60%;
+    --gradient-blue-end: 221 83% 53%;
+    --gradient-purple-start: 271 91% 65%;
+    --gradient-purple-end: 271 91% 55%;
+    --gradient-pink-start: 330 81% 60%;
+    --gradient-pink-end: 330 81% 50%;
+    --gradient-teal-start: 173 80% 40%;
+    --gradient-teal-end: 142 71% 45%;
+    
+    /* Shadow effects */
+    --shadow-glow-blue: 217 91% 60%;
+    --shadow-glow-purple: 271 91% 65%;
+    --shadow-glow-pink: 330 81% 60%;
+  }
+
+  /* Light mode theme */
+  .light {
+    --background: 0 0% 98%;
+    --background-secondary: 0 0% 95%;
+    --background-tertiary: 0 0% 92%;
+    --foreground: 222 47% 11%;
+    
+    --card: 0 0% 100%;
+    --card-glass: 0 0% 99%;
+    --card-foreground: 222 47% 11%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    
+    --primary: 217 91% 50%;
+    --primary-glow: 221 83% 45%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 142 71% 40%;
+    --secondary-glow: 173 80% 35%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent-purple: 271 91% 55%;
+    --accent-purple-glow: 271 91% 48%;
+    
+    --accent-pink: 330 81% 55%;
+    --accent-pink-glow: 330 81% 48%;
+    
+    --muted: 215 16% 57%;
+    --muted-foreground: 215 20% 45%;
+    
+    --accent: 217 91% 50%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 215 28% 85%;
+    --input: 215 28% 90%;
+    --ring: 217 91% 50%;
+    
+    --text-primary: 222 47% 11%;
+    --text-secondary: 222 47% 40%;
+    --text-subtle: 222 47% 55%;
+    
+    --shadow-glow-blue: 217 91% 50%;
+    --shadow-glow-purple: 271 91% 55%;
+    --shadow-glow-pink: 330 81% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    background: linear-gradient(to bottom, hsl(var(--background)), hsl(var(--background-secondary)));
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+
+  /* Light mode body background */
+  .light body {
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 50%, #f5f8ff 100%);
+  }
+}
+
+@layer utilities {
+  /* Glassmorphism effect - Dark mode */
+  .dark .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  /* Glassmorphism effect - Light mode */
+  .light .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/40 shadow-lg;
+  }
+  
+  /* Update card styling for light mode */
+  .light .bg-card {
+    @apply bg-white shadow-sm;
+  }
+  
+  .light .border-border {
+    @apply border-gray-200;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--accent-purple))] to-[hsl(var(--accent-pink))] bg-clip-text text-transparent;
+  }
+  
+  /* Glow effects */
+  .glow-blue {
+    box-shadow: 0 0 40px hsla(var(--shadow-glow-blue), 0.3);
+  }
+  
+  .glow-purple {
+    box-shadow: 0 0 40px hsla(var(--shadow-glow-purple), 0.3);
+  }
+  
+  .glow-pink {
+    box-shadow: 0 0 40px hsla(var(--shadow-glow-pink), 0.3);
+  }
+  
+  /* Hover glow transition */
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+  
+  .hover-glow:hover {
+    @apply glow-blue scale-105;
+  }
+  
+  /* Gradient border */
+  .gradient-border {
+    position: relative;
+  }
+  
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, 
+      hsl(var(--primary)), 
+      hsl(var(--accent-purple)), 
+      hsl(var(--accent-pink))
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}

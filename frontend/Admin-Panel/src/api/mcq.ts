@@ -1,0 +1,90 @@
+import apiClient from "./index";
+
+export interface McqOptionDto {
+  id?: number;
+  option_text: string;
+  is_correct: boolean;
+}
+
+export interface CreateMcqDto {
+  question_text: string;
+  explanation?: string;
+  difficulty?: string;
+  options: McqOptionDto[];
+}
+
+export interface UpdateMcqDto extends Partial<CreateMcqDto> {}
+
+export const mcqApi = {
+  // Create MCQ (topic_id passed as query param)
+  create: async (topicId: number, data: CreateMcqDto) => {
+    try {
+      const response = await apiClient.post(`mcqs?topic_id=${topicId}`, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get MCQs by topic
+  getByTopic: async (topicId: number) => {
+    try {
+      const response = await apiClient.get(`mcqs/${topicId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Update MCQ by id
+  update: async (mcqId: number, data: UpdateMcqDto) => {
+    try {
+      const response = await apiClient.patch(`mcqs/${mcqId}`, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Delete MCQ
+  delete: async (mcqId: number) => {
+    try {
+      const response = await apiClient.delete(`mcqs/${mcqId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Bulk upload practice (topic_id + file)
+  bulkUploadPractice: async (topicId: number, file: File) => {
+    try {
+      const fd = new FormData();
+      fd.append("topic_id", String(topicId));
+      fd.append("file", file);
+
+      const response = await apiClient.post("bulk-upload/practice", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Bulk upload mock test (mock_test_title + file)
+  bulkUploadMockTest: async (mockTestTitle: string, file: File) => {
+    try {
+      const fd = new FormData();
+      fd.append("mock_test_title", mockTestTitle);
+      fd.append("file", file);
+
+      const response = await apiClient.post("bulk-upload/mock-test", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+};
