@@ -59,18 +59,7 @@ export default function MCQManager() {
     return (
         <div className="space-y-6 container mx-auto p-4 md:p-6 max-w-7xl animate-in fade-in duration-500">
 
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 p-3 rounded-xl">
-                        <BookOpen className="w-8 h-8 text-primary" />
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">MCQ Admin Panel</h1>
-                        <p className="text-muted-foreground">Manage your question bank</p>
-                    </div>
-                </div>
-            </div>
+
 
             {/* Topic Selector Card with Bulk Upload Button */}
             <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-6 rounded-xl">
@@ -129,7 +118,7 @@ export default function MCQManager() {
                             </div>
                         </div>
                     </div>
-                    
+
                     <Button
                         variant={viewMode === "bulk" ? "default" : "secondary"}
                         className="rounded-lg px-6 flex items-center gap-2 whitespace-nowrap"

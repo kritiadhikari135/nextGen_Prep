@@ -1,13 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from presentation.schemas.user_schema import SignupRequest, LoginRequest, RefreshRequest
-from presentation.dependencies import get_db, get_current_user
 from application.auth.register_usecase import register_user
 from application.auth.login_usecase import login_user
 from infrastructure.security.jwt_service import (
     decode_refresh_token,
     create_access_token,
 )
-from sqlalchemy.orm import Session
 import logging
 
 logger = logging.getLogger(__name__)
@@ -78,35 +76,3 @@ def refresh(request: RefreshRequest):
     except Exception as e:
         logger.warning(f"Token refresh failed: {e}")
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
-
-
-# ==================== GET CURRENT USER ====================
-@router.get("/me")
-def get_current_user_endpoint(
-    current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """
-    Get the current authenticated user's information.
-    """
-    try:
-        from infrastructure.db.models.user_model import UserModel
-        
-        user_id = current_user.get("user_id")
-        user = db.query(UserModel).filter(UserModel.id == user_id).first()
-        
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        return {
-            "id": user.id,
-            "email": user.email,
-            "name": user.name,
-            "role": user.role,
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error fetching current user: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-

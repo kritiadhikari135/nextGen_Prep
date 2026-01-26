@@ -1,14 +1,15 @@
 import apiClient from "./index";
+import { extractErrorMessage } from "@/lib/error-handler";
 
 export interface Note {
   id: number;
   title: string;
   topic_id: number;
-  file_url: string;
+  file_path: string;
   file_size?: number;
   mime_type?: string;
-  created_at?: string;
-  updated_at?: string;
+  created_at?: string | Date;
+  updated_at?: string | Date;
 }
 
 export interface CreateNoteDto {
@@ -22,10 +23,11 @@ export interface UpdateNoteDto {
 export const notesApi = {
   getAll: async () => {
     try {
-      const response = await apiClient.get<Note[]>("/notes");
+      const response = await apiClient.get<Note[]>("/notes/all");
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to fetch notes");
+      throw new Error(message);
     }
   },
 
@@ -36,7 +38,8 @@ export const notesApi = {
       });
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to fetch notes");
+      throw new Error(message);
     }
   },
 
@@ -45,7 +48,8 @@ export const notesApi = {
       const response = await apiClient.get<Note>(`/notes/${noteId}`);
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to fetch note");
+      throw new Error(message);
     }
   },
 
@@ -61,7 +65,8 @@ export const notesApi = {
       });
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to create note");
+      throw new Error(message);
     }
   },
 
@@ -70,7 +75,8 @@ export const notesApi = {
       const response = await apiClient.patch<Note>(`/notes/${noteId}`, data);
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to update note");
+      throw new Error(message);
     }
   },
 
@@ -78,7 +84,8 @@ export const notesApi = {
     try {
       await apiClient.delete(`/notes/${noteId}`);
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to delete note");
+      throw new Error(message);
     }
   },
 };

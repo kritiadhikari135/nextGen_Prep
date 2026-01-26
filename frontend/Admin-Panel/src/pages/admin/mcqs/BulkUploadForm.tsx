@@ -32,7 +32,10 @@ export default function BulkUploadForm({ topicId, onSuccess }: BulkUploadFormPro
             if (fileInputRef.current) fileInputRef.current.value = "";
         } catch (error: any) {
             console.error(error);
-            setNotification({ type: "error", message: error?.response?.data?.message || "Bulk upload failed" });
+            const message = error instanceof Error 
+              ? error.message 
+              : error?.response?.data?.message || "Bulk upload failed";
+            setNotification({ type: "error", message });
         } finally {
             setLoading(false);
         }

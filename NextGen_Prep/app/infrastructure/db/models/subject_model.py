@@ -20,11 +20,14 @@ class PracticeSubject(Base):
     description = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    # Relationships
     # Topics cascade when subject is deleted
     topics = relationship(
         "Topic", back_populates="subject", cascade="all, delete-orphan"
     )
 
+    user_subjects = relationship("UserSubject", back_populates="subject", cascade="all, delete-orphan",passive_deletes=True)
+    sessions = relationship("LearningSession", back_populates="subject", cascade="all, delete-orphan")
 
 class MockTestSubject(Base):
     __tablename__ = "mock_test_subjects"

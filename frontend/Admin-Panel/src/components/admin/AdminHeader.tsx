@@ -14,8 +14,8 @@ import { useAuth } from "@/context/useAuth";
 import { useTheme } from "@/context/ThemeContext";
 
 export const AdminHeader = () => {
-    const { user, logout } = useAuth();
-    const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   return (
@@ -23,7 +23,7 @@ export const AdminHeader = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Welcome back </h2>
-          <p className="text-sm text-muted-foreground">Here's what's happening today</p>
+
         </div>
 
         <div className="flex items-center gap-4">
@@ -37,18 +37,8 @@ export const AdminHeader = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="font-semibold">Profile</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/settings/profile")}>
-                Profile Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/settings/password")}>
-                Change Password
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/settings/forgetpassword")}>
-                Forget Password
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              
+
+
               {/* Theme Toggle */}
               <div className="px-2 py-1.5">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Theme</p>
@@ -77,7 +67,7 @@ export const AdminHeader = () => {
                   </Button>
                 </div>
               </div>
-              
+
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-destructive">
                 Logout

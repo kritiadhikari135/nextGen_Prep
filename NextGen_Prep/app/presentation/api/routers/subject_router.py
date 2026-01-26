@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from presentation.schemas.subject_schema import PracticeSubjectCreate, PracticeSubjectOut
 from infrastructure.db.models.subject_model import PracticeSubject
-
+from presentation.schemas.subject_schema import PracticeSubjectCreate, PracticeSubjectOut
 from presentation.dependencies import get_db, admin_required
 from infrastructure.repositories.subject_repo_impl import (
     create_practice_subject,
@@ -16,10 +15,12 @@ import logging
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/subjects", tags=["Subjects"])
 
+
 # count the number of subjects  
 @router.get("/count", response_model=int)
 def count_subjects(db: Session = Depends(get_db)):
     return db.query(PracticeSubject).count()
+
 
 @router.post("", response_model=PracticeSubjectOut)
 def add_subject(
@@ -34,7 +35,7 @@ def add_subject(
 
 
 @router.get("", response_model=list[PracticeSubjectOut])
-def list_subjects(db: Session = Depends(get_db), admin: dict = Depends(admin_required)):
+def list_subjects(db: Session = Depends(get_db)):
     return get_all_practice_subjects(db)
 
 
@@ -42,7 +43,6 @@ def list_subjects(db: Session = Depends(get_db), admin: dict = Depends(admin_req
 def get_subject(
     subject_id: int,
     db: Session = Depends(get_db),
-    admin: dict = Depends(admin_required),
 ):
     try:
         return get_practice_subject_by_id(db, subject_id)

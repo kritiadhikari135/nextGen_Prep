@@ -1,8 +1,12 @@
+from datetime import datetime
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from infrastructure.db.models.mcq_model import PracticeMCQ, OptionModel, MockTestMCQ
+from infrastructure.db.models.attempt_model import AttemptModel
 from infrastructure.db.models.mock_test_model import MockTestModel
 from infrastructure.db.models.user_model import UserModel
+from presentation.schemas.mcq_schema import PracticeMCQOut, MockTestMCQOut
 from presentation.schemas.mock_test_schema import MockTestOut
 from presentation.dependencies import get_db, get_current_user, admin_required
 from infrastructure.repositories.mock_test_repo_impl import MockTestRepository

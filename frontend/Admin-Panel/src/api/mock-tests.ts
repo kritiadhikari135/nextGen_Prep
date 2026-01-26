@@ -1,4 +1,5 @@
 import apiClient from "./index";
+import { extractErrorMessage } from "@/lib/error-handler";
 
 export interface MockTest {
   id: number;
@@ -23,7 +24,8 @@ export const mockTestsApi = {
       const response = await apiClient.get<MockTest[]>("/mock-tests");
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to fetch mock tests");
+      throw new Error(message);
     }
   },
 
@@ -32,7 +34,8 @@ export const mockTestsApi = {
       const response = await apiClient.get<MockTest>(`/mock-tests/${mockTestId}`);
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to fetch mock test");
+      throw new Error(message);
     }
   },
 
@@ -48,7 +51,8 @@ export const mockTestsApi = {
       );
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to create mock test");
+      throw new Error(message);
     }
   },
 
@@ -60,7 +64,8 @@ export const mockTestsApi = {
       );
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to update mock test");
+      throw new Error(message);
     }
   },
 
@@ -68,7 +73,8 @@ export const mockTestsApi = {
     try {
       await apiClient.delete(`/mock-tests/${mockTestId}`);
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to delete mock test");
+      throw new Error(message);
     }
   },
 };

@@ -1,4 +1,5 @@
 import apiClient from "./index";
+import { extractErrorMessage } from "@/lib/error-handler";
 
 export interface Subject {
     id: number;
@@ -19,7 +20,8 @@ export const subjectsApi = {
             const response = await apiClient.get<Subject[]>("/subjects");
             return response.data;
         } catch (error) {
-            throw error;
+            const message = extractErrorMessage(error, "Failed to fetch subjects");
+            throw new Error(message);
         }
     },
 
@@ -28,7 +30,8 @@ export const subjectsApi = {
             const response = await apiClient.get<Subject>(`/subjects/${id}`);
             return response.data;
         } catch (error) {
-            throw error;
+            const message = extractErrorMessage(error, "Failed to fetch subject");
+            throw new Error(message);
         }
     },
 
@@ -37,7 +40,8 @@ export const subjectsApi = {
             const response = await apiClient.post<Subject>("/subjects", data);
             return response.data;
         } catch (error) {
-            throw error;
+            const message = extractErrorMessage(error, "Failed to create subject");
+            throw new Error(message);
         }
     },
 
@@ -46,7 +50,8 @@ export const subjectsApi = {
             const response = await apiClient.patch<Subject>(`/subjects/${id}`, data);
             return response.data;
         } catch (error) {
-            throw error;
+            const message = extractErrorMessage(error, "Failed to update subject");
+            throw new Error(message);
         }
     },
 
@@ -54,7 +59,8 @@ export const subjectsApi = {
         try {
             await apiClient.delete(`/subjects/${id}`);
         } catch (error) {
-            throw error;
+            const message = extractErrorMessage(error, "Failed to delete subject");
+            throw new Error(message);
         }
     },
 };

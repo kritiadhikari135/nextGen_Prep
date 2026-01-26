@@ -1,4 +1,5 @@
 import apiClient from "./index";
+import { extractErrorMessage } from "@/lib/error-handler";
 
 export interface McqOptionDto {
   id?: number;
@@ -22,7 +23,8 @@ export const mcqApi = {
       const response = await apiClient.post(`mcqs?topic_id=${topicId}`, data);
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to create MCQ");
+      throw new Error(message);
     }
   },
 
@@ -32,7 +34,8 @@ export const mcqApi = {
       const response = await apiClient.get(`mcqs/${topicId}`);
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to fetch MCQs");
+      throw new Error(message);
     }
   },
 
@@ -42,7 +45,8 @@ export const mcqApi = {
       const response = await apiClient.patch(`mcqs/${mcqId}`, data);
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to update MCQ");
+      throw new Error(message);
     }
   },
 
@@ -52,7 +56,8 @@ export const mcqApi = {
       const response = await apiClient.delete(`mcqs/${mcqId}`);
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to delete MCQ");
+      throw new Error(message);
     }
   },
 
@@ -68,7 +73,8 @@ export const mcqApi = {
       });
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to upload MCQs");
+      throw new Error(message);
     }
   },
 
@@ -84,7 +90,8 @@ export const mcqApi = {
       });
       return response.data;
     } catch (error) {
-      throw error;
+      const message = extractErrorMessage(error, "Failed to upload mock test");
+      throw new Error(message);
     }
   },
 };

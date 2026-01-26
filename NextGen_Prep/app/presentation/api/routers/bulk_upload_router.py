@@ -8,6 +8,7 @@ from presentation.schemas.practice_bulk_schema import (
 )
 from infrastructure.repositories.practice_bulk_repo_impl import PracticeBulkRepository
 from infrastructure.repositories.mock_test_repo_impl import MockTestRepository
+from infrastructure.db.models.mock_test_model import MockTestModel
 from presentation.schemas.mock_test_schema import (
     MockTestOut,
     MockTestBulkCreate,
@@ -63,7 +64,7 @@ async def bulk_upload_mock_test(
     - subject: Subject name (will be auto-created if it doesn't exist)
     - question_text: The question text
     - option1, option2, option3, option4: The four options
-    - correct_answer: Either "1", "2", "3", "4" or the exact text of the correct option
+    - correct_answer: the exact text of the correct option
     """
     try:
         logger.info(
@@ -77,14 +78,14 @@ async def bulk_upload_mock_test(
         if file.filename.endswith(".csv"):
             try:
                 df = pd.read_csv(
-                    io.BytesIO(file_content), on_bad_lines="skip", engine="python"
+                    io.BytesIO(file_content), on_bad_lines="skip", engine="python", keep_default_na=False
                 )
             except Exception as e:
                 logger.error(f"Error parsing CSV: {e}")
                 raise ValueError(f"Error parsing CSV file: {str(e)}")
         elif file.filename.endswith((".xlsx", ".xls")):
             try:
-                df = pd.read_excel(io.BytesIO(file_content))
+                df = pd.read_excel(io.BytesIO(file_content), keep_default_na=False)
             except Exception as e:
                 logger.error(f"Error parsing Excel: {e}")
                 raise ValueError(f"Error parsing Excel file: {str(e)}")
@@ -125,29 +126,69 @@ async def bulk_upload_mock_test(
         try:
             # Prepare validated data for repository
             validated_questions = []
-            for q in questions_data:
+            for idx, q in enumerate(questions_data):
                 # Helper to get string safely
-                def get_str(key):
+                def get_str(key, default=""):
                     val = q.get(key)
-                    return str(val).strip() if not pd.isna(val) else ""
+                    if pd.isna(val) or str(val).strip() == "":
+                        return default
+                    return str(val).strip()
 
                 # Determine which option is correct
                 correct_val = get_str("correct_answer")
                 
-                options = []
-                for i in range(1, 5):
-                    opt_text = get_str(f"option{i}")
-                    # Correct if matches "1", "2", "3", "4" or exact text
-                    # We handle the case where correct_val might be "1.0" from Excel
-                    is_correct = False
+                # First pass: collect all options and determine which one is correct
+                option_texts = []
+                for i in range(1, 4 + 1):
+                    opt_text = get_str(f"option{i}", default="None")
+                    option_texts.append(opt_text)
+                
+                # Find the correct option index (0-based)
+                correct_index = None
+                
+                # Case 1: Exact text match (highest priority)
+                for i, opt_text in enumerate(option_texts):
+                    if correct_val.lower() == opt_text.lower():
+                        correct_index = i
+                        break
+                
+                # Case 2: Numeric comparison (only if Case 1 didn't find a match)
+                if correct_index is None:
                     try:
-                        if float(correct_val) == float(i):
-                            is_correct = True
-                    except ValueError:
-                        if correct_val == opt_text:
-                            is_correct = True
-                    
-                    options.append(OptionCreate(text=opt_text, is_correct=is_correct))
+                        cv_float = float(correct_val)
+                        # Try matching with option text as number
+                        for i, opt_text in enumerate(option_texts):
+                            try:
+                                if cv_float == float(opt_text):
+                                    correct_index = i
+                                    break
+                            except (ValueError, TypeError):
+                                pass
+                        
+                        # Try matching with 1-based index (only if still not found)
+                        if correct_index is None:
+                            index_as_int = int(cv_float)
+                            if 1 <= index_as_int <= 4:
+                                correct_index = index_as_int - 1  # Convert to 0-based
+                    except (ValueError, TypeError):
+                        pass
+                
+                # Count how many correct answers we found (should be exactly 1)
+                correct_found_count = 1 if correct_index is not None else 0
+                
+                # Second pass: create OptionCreate objects with correct marking
+                options = []
+                for i, opt_text in enumerate(option_texts):
+                    is_correct = (i == correct_index)
+                    options.append(OptionCreate(option_text=opt_text, is_correct=is_correct))
+
+                # DEBUG LOGGING: Help the user identify which row is failing the "Exactly one correct" rule
+                if correct_found_count != 1:
+                    logger.warning(
+                        f"DEBUG: Correct answer mismatch at Row {idx + 2}. "
+                        f"Expected: '{correct_val}', Found matches: {correct_found_count}. "
+                        f"Options: [1: '{get_str('option1', 'None')}', 2: '{get_str('option2', 'None')}', 3: '{get_str('option3', 'None')}', 4: '{get_str('option4', 'None')}']"
+                    )
                 
                 validated_questions.append(QuestionCreate(
                     subject=get_str("subject"),
@@ -157,7 +198,18 @@ async def bulk_upload_mock_test(
             
             bulk_data = MockTestBulkCreate(title=mock_test_title, questions=validated_questions)
             
+            # Check if mock test with this title already exists
             repo = MockTestRepository(db)
+            existing_test = db.query(MockTestModel).filter(
+                MockTestModel.title.ilike(mock_test_title.strip())
+            ).first()
+            
+            if existing_test:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"A mock test with the title '{mock_test_title}' already exists. Please use a different title."
+                )
+            
             mock_test = repo.bulk_create_mock_test(
                 data=bulk_data,
                 admin_id=admin["user_id"]
@@ -167,7 +219,6 @@ async def bulk_upload_mock_test(
                 id=mock_test.id,
                 title=mock_test.title,
                 total_questions=len(mock_test.questions),
-                file_url=mock_test.file_url,
             )
         except ValidationError as e:
             logger.warning(f"Schema validation error: {e}")

@@ -21,12 +21,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Pencil,
   Trash2,
   Loader2,
   FileText,
   Download,
   ChevronDown,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -48,6 +55,8 @@ export default function NotesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedNoteFile, setSelectedNoteFile] = useState<string | null>(null);
 
   const [topicName, setTopicName] = useState("");
   const [topicId, setTopicId] = useState<number | null>(null);
@@ -77,7 +86,13 @@ export default function NotesPage() {
     try {
       setIsLoading(true);
       const data = await notesApi.getAll();
-      setNotes(data);
+      // Sort notes by created_at in descending order (recent first)
+      const sortedNotes = [...data].sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dateB - dateA;
+      });
+      setNotes(sortedNotes);
     } finally {
       setIsLoading(false);
     }
@@ -127,6 +142,9 @@ export default function NotesPage() {
 
       resetForm();
       fetchNotes();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An error occurred";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -206,7 +224,7 @@ export default function NotesPage() {
                 />
                 <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
-              
+
               {/* Dropdown */}
               {showTopicDropdown && topicName && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg z-10 max-h-64 overflow-y-auto">
@@ -304,24 +322,25 @@ export default function NotesPage() {
                   <TableHead>Title</TableHead>
                   <TableHead>Topic</TableHead>
                   <TableHead>Subject</TableHead>
-                  <TableHead>File</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {notes.map(note => (
                   <TableRow key={note.id}>
-                    <TableCell>{note.title}</TableCell>
-                    <TableCell>{getTopicName(note.topic_id)}</TableCell>
-                    <TableCell>{getSubjectName(note.topic_id)}</TableCell>
                     <TableCell>
                       <button
-                        onClick={() => handleDownload(note.file_url)}
-                        className="text-purple-600 flex items-center gap-1"
+                        onClick={() => {
+                          setSelectedNoteFile(note.file_path);
+                          setViewerOpen(true);
+                        }}
+                        className="text-purple-600 hover:underline font-medium"
                       >
-                        <Download className="h-4 w-4" /> Download
+                        {note.title}
                       </button>
                     </TableCell>
+                    <TableCell>{getTopicName(note.topic_id)}</TableCell>
+                    <TableCell>{getSubjectName(note.topic_id)}</TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button
                         size="icon"
@@ -352,6 +371,24 @@ export default function NotesPage() {
         </CardContent>
       </Card>
 
+      {/* File Viewer Dialog */}
+      <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] p-0 flex flex-col">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle>View Note</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto">
+            {selectedNoteFile ? (
+              <iframe
+                src={selectedNoteFile}
+                className="w-full h-full"
+                title="Note Viewer"
+              />
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Dialog */}
       <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
@@ -365,9 +402,19 @@ export default function NotesPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600"
-              onClick={() =>
-                deleteId && notesApi.delete(deleteId).then(fetchNotes)
-              }
+              onClick={() => {
+                if (deleteId) {
+                  notesApi.delete(deleteId)
+                    .then(() => {
+                      toast.success("Note deleted successfully");
+                      fetchNotes();
+                    })
+                    .catch((error) => {
+                      const message = error instanceof Error ? error.message : "Failed to delete note";
+                      toast.error(message);
+                    });
+                }
+              }}
             >
               Delete
             </AlertDialogAction>

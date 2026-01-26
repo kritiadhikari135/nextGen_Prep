@@ -1,7 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.presentation.dependencies import get_db
-from app.infrastructure.db.models.notes import Note
+from app.presentation.dependencies import get_db, admin_required
 from app.infrastructure.repositories.note_repo import (
     create_note,
     get_notes_by_topic,
@@ -10,6 +9,7 @@ from app.infrastructure.repositories.note_repo import (
     delete_note,
     get_all_notes,
 )
+from app.infrastructure.db.models.notes import Note
 from app.presentation.schemas.notes import NoteResponse,NoteUpdate
 import os
 import logging
@@ -19,32 +19,28 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/notes", tags=["Notes"])
 
-
 # count the numbers of notes
 @router.get("/count", response_model=int)
 def count_notes(db: Session = Depends(get_db)):
     return db.query(Note).count()
 
+
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 BASE_URL = "http://127.0.0.1:8000/uploads"  # base URL for frontend
 
+# get all notes 
 
-@router.get("/", response_model=List[NoteResponse])
-def get_all_notes_endpoint(db: Session = Depends(get_db)):
-    """
-    Retrieve all notes from the database.
-    """
+@router.get("/all", response_model=List[NoteResponse])
+def get_all(db: Session = Depends(get_db)):
     try:
-        notes = get_all_notes(db=db)
-        return notes
+        return get_all_notes(db)
     except Exception as e:
-        logger.error(f"Failed to retrieve all notes: {e}", exc_info=True)
+        logger.error(f"Failed to retrieve notes: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not retrieve notes: {str(e)}",
         )
-
 
 @router.post("/", response_model=NoteResponse)
 def upload_note(
@@ -52,6 +48,7 @@ def upload_note(
     title: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    admin: dict = Depends(admin_required),
 ):
     file_location = os.path.join(UPLOAD_DIR, file.filename)
     file_url = f"{BASE_URL}/{file.filename}"  # URL to serve to frontend
@@ -89,7 +86,7 @@ def upload_note(
     response_model=List[NoteResponse],
     summary="Get all notes for a topic",
 )
-def get_notes(topic_id: int, db: Session = Depends(get_db)):
+def get_notes_of_topic(topic_id: int, db: Session = Depends(get_db)):
     """
     Retrieve all notes associated with a given topic.
     """
@@ -156,3 +153,4 @@ def remove_note(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
+

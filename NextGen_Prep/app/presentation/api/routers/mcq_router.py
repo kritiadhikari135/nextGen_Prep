@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from infrastructure.db.models.mcq_model import PracticeMCQ
 from presentation.schemas.mcq_schema import PracticeMCQCreate, PracticeMCQOut, PracticeMCQUpdate
 from presentation.dependencies import get_db, admin_required
 from infrastructure.repositories.mcq_repo_impl import create_mcq, get_mcqs_by_topic_id, delete_mcq_by_id, update_mcq_by_id
@@ -8,12 +9,13 @@ import logging
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/mcqs", tags=["MCQs"])
 
-from infrastructure.db.models.mcq_model import PracticeMCQ
+
 
 #count the numbers of practice mcqs
 @router.get("/count", response_model=int)
 def count_mcqs(db: Session = Depends(get_db)):
     return db.query(PracticeMCQ).count()
+
 
 @router.post("", response_model=PracticeMCQOut)
 def add_mcq(

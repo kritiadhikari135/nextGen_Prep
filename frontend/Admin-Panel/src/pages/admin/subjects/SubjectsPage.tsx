@@ -56,7 +56,8 @@ export default function SubjectsPage() {
             const data = await subjectsApi.getAll();
             setSubjects(data);
         } catch (error) {
-            toast.error("Failed to fetch subjects");
+            const message = error instanceof Error ? error.message : "Failed to fetch subjects";
+            toast.error(message);
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -92,9 +93,8 @@ export default function SubjectsPage() {
             resetForm();
             fetchSubjects();
         } catch (error) {
-            toast.error(
-                editingId ? "Failed to update subject" : "Failed to create subject"
-            );
+            const message = error instanceof Error ? error.message : "An error occurred";
+            toast.error(message);
             console.error(error);
         } finally {
             setIsSubmitting(false);
@@ -118,8 +118,8 @@ export default function SubjectsPage() {
             toast.success("Subject deleted successfully");
             fetchSubjects();
         } catch (error) {
-            toast.error("Failed to delete subject");
-            console.error(error);
+            const message = error instanceof Error ? error.message : "An error occurred";
+            toast.error(message);
         } finally {
             setDeleteId(null);
         }

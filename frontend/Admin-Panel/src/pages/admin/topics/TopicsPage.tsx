@@ -63,8 +63,9 @@ export default function TopicsPage() {
       setSubjectsLoading(true);
       const data = await subjectsApi.getAll();
       setSubjects(data);
-    } catch {
-      toast.error("Failed to fetch subjects");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to fetch subjects";
+      toast.error(message);
     } finally {
       setSubjectsLoading(false);
     }
@@ -75,8 +76,9 @@ export default function TopicsPage() {
       setIsLoading(true);
       const data = await topicsApi.getAll();
       setTopics(data);
-    } catch {
-      toast.error("Failed to fetch topics");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to fetch topics";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +114,9 @@ export default function TopicsPage() {
       }
       resetForm();
       fetchTopics();
-    } catch {
-      toast.error(editingId ? "Failed to update topic" : "Failed to create topic");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An error occurred";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -132,8 +135,9 @@ export default function TopicsPage() {
       await topicsApi.delete(deleteId);
       toast.success("Topic deleted successfully");
       fetchTopics();
-    } catch {
-      toast.error("Failed to delete topic");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An error occurred";
+      toast.error(message);
     } finally {
       setDeleteId(null);
     }

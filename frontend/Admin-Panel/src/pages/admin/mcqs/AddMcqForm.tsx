@@ -67,7 +67,10 @@ export default function AddMcqForm({ topicId, onSuccess }: AddMcqFormProps) {
             }
         } catch (error: any) {
             console.error(error);
-            setNotification({ type: "error", message: error?.response?.data?.message || "Failed to create MCQ" });
+            const message = error instanceof Error 
+              ? error.message 
+              : error?.response?.data?.message || "Failed to create MCQ";
+            setNotification({ type: "error", message });
         } finally {
             setLoading(false);
         }

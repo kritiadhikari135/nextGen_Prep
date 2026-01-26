@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from infrastructure.db.models.topic_model import Topic
 from presentation.schemas.topic_schema import TopicCreate, TopicOut
+from infrastructure.db.models.topic_model import Topic
 from presentation.dependencies import get_db, admin_required
 from infrastructure.repositories.topic_repo_impl import (
     create_topic,
@@ -14,12 +14,14 @@ from infrastructure.repositories.topic_repo_impl import (
 import logging
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/topics", tags=["Topics"])
 
+router = APIRouter(prefix="/topics", tags=["Topics"])
+# ==================== STATS ====================
 # count the number of topics  
 @router.get("/count", response_model=int)
 def count_topics(db: Session = Depends(get_db)):
     return db.query(Topic).count()
+
 
 # ==================== CREATE ====================
 @router.post("", response_model=TopicOut)
@@ -48,18 +50,17 @@ def add_topic(
 @router.get("", response_model=list[TopicOut])
 def list_topics(
     subject_id: int | None = Query(None),
-    db: Session = Depends(get_db),
-    admin: dict = Depends(admin_required),
+    db: Session = Depends(get_db)
 ):
     """Get all topics, optionally filtered by subject_id"""
     try:
         if subject_id:
             logger.info(
-                f"Admin {admin['user_id']} fetching topics for subject_id: {subject_id}"
+                f" fetching topics for subject_id: {subject_id}"
             )
             topics = get_topics_by_subject(db, subject_id)
         else:
-            logger.info(f"Admin {admin['user_id']} fetching all topics")
+            logger.info(f" fetching all topics")
             topics = get_all_topics(db)
         return topics
     except Exception as e:
@@ -69,11 +70,11 @@ def list_topics(
 
 @router.get("/{topic_id}", response_model=TopicOut)
 def get_topic(
-    topic_id: int, db: Session = Depends(get_db), admin: dict = Depends(admin_required)
+    topic_id: int, db: Session = Depends(get_db)
 ):
     """Get a specific topic by ID"""
     try:
-        logger.info(f"Admin {admin['user_id']} fetching topic {topic_id}")
+        logger.info(f" fetching topic {topic_id}")
         topic = get_topic_by_id(db, topic_id)
         return topic
     except ValueError as e:

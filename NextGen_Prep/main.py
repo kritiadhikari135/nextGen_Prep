@@ -15,9 +15,12 @@ from app.presentation.api.routers import (
     bulk_upload_router,
     note_router,
     auth_routes,
-    # user_routes,
+    user_routes,
     practice_router,
     mock_test_router,
+    next_question,
+    concept_router,
+    template_router,
     dashboard_router,
 )
 
@@ -65,9 +68,12 @@ app.include_router(subject_router.router)
 app.include_router(topic_router.router)
 app.include_router(note_router.router)
 app.include_router(bulk_upload_router.router)
-# app.include_router(user_routes.router)
+app.include_router(user_routes.router)
 app.include_router(practice_router.router)
 app.include_router(mock_test_router.router)
+app.include_router(next_question.router)
+app.include_router(concept_router.router)
+app.include_router(template_router.router)
 app.include_router(dashboard_router.router)
 
 # Optional root endpoint
