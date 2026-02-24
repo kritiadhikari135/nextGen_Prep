@@ -74,29 +74,36 @@ export default function NotesPage() {
 
   const fetchTopics = async () => {
     const data = await topicsApi.getAll();
-    setTopics(data);
+      setTopics(Array.isArray(data) ? data : []);
   };
 
   const fetchSubjects = async () => {
     const data = await subjectsApi.getAll();
-    setSubjects(data);
+     setSubjects(Array.isArray(data) ? data : []);
   };
 
   const fetchNotes = async () => {
-    try {
-      setIsLoading(true);
-      const data = await notesApi.getAll();
-      // Sort notes by created_at in descending order (recent first)
-      const sortedNotes = [...data].sort((a, b) => {
-        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return dateB - dateA;
-      });
-      setNotes(sortedNotes);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  try {
+    setIsLoading(true);
+    const data = await notesApi.getAll();
+    
+    // Ensure data is an array before sorting
+    const notesArray = Array.isArray(data) ? data : [];
+    
+    // Sort notes by created_at in descending order (recent first)
+    const sortedNotes = [...notesArray].sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    });
+    setNotes(sortedNotes);
+  } catch (error) {
+    console.error("Failed to fetch notes:", error);
+    setNotes([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const resetForm = () => {
     setTopicName("");

@@ -62,7 +62,8 @@ export default function TopicsPage() {
     try {
       setSubjectsLoading(true);
       const data = await subjectsApi.getAll();
-      setSubjects(data);
+     setSubjects(Array.isArray(data) ? data : []);
+      
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to fetch subjects";
       toast.error(message);
@@ -75,7 +76,7 @@ export default function TopicsPage() {
     try {
       setIsLoading(true);
       const data = await topicsApi.getAll();
-      setTopics(data);
+   setTopics(Array.isArray(data) ? data : []);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to fetch topics";
       toast.error(message);

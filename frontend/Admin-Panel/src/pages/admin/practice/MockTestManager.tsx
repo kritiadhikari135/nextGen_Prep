@@ -53,7 +53,7 @@ export default function MockTestManager() {
     try {
       setIsLoading(true);
       const data = await mockTestsApi.getAll();
-      setMockTests(data);
+      setMockTests(Array.isArray(data) ? data : []);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to fetch mock tests";
       toast.error(message);

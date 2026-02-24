@@ -26,12 +26,12 @@ export default function MCQManager() {
 
     const fetchTopics = async () => {
         const data = await topicsApi.getAll();
-        setTopics(data);
+        setTopics(Array.isArray(data) ? data : []);
     };
 
     const fetchSubjects = async () => {
         const data = await subjectsApi.getAll();
-        setSubjects(data);
+       setSubjects(Array.isArray(data) ? data : []);
     };
 
     const filteredTopics = topics.filter(t =>

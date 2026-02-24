@@ -17,7 +17,8 @@ export interface UpdateSubjectDto extends Partial<CreateSubjectDto> { }
 export const subjectsApi = {
     getAll: async () => {
         try {
-            const response = await apiClient.get<Subject[]>("/subjects");
+            const response = await apiClient.get("/subjects");
+            console.log("ubjects",response);
             return response.data;
         } catch (error) {
             const message = extractErrorMessage(error, "Failed to fetch subjects");

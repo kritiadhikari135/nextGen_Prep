@@ -54,7 +54,8 @@ export default function SubjectsPage() {
         try {
             setIsLoading(true);
             const data = await subjectsApi.getAll();
-            setSubjects(data);
+            setSubjects(Array.isArray(data) ? data : []);
+            console.log(subjects)
         } catch (error) {
             const message = error instanceof Error ? error.message : "Failed to fetch subjects";
             toast.error(message);
