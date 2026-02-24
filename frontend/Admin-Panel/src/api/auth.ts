@@ -15,12 +15,10 @@ interface LoginResponse {
   access_token: string;
   refresh_token: string;
   token_type: string;
-  user: {
-    id: number;
-    email: string;
-    name: string;
-    role: string;
-  };
+  id: number;
+  email: string;
+  name: string;
+  role: string;
 }
 
 interface SignupRequest {
@@ -38,6 +36,18 @@ const STORAGE_TOKEN_KEY = "authToken";
 const STORAGE_USER_KEY = "authUser";
 const STORAGE_REFRESH_TOKEN_KEY = "refreshToken";
 
+// Helper function to validate user object
+const isValidUser = (user: any): boolean => {
+  return (
+    user &&
+    typeof user === "object" &&
+    !Array.isArray(user) &&
+    typeof user.id !== "undefined" &&
+    (typeof user.email === "string" || typeof user.name === "string") &&
+    !user.toString().includes("<!DOCTYPE")
+  );
+};
+
 export const authApi = {
   login: async (email: string, password: string): Promise<ApiResponse<{ access_token: string; user: any }>> => {
     try {
@@ -46,7 +56,17 @@ export const authApi = {
         password,
       });
 
-      const { access_token, refresh_token, user } = response.data;
+      const { access_token, refresh_token, id, email: respEmail, name: respName, role } = response.data;
+      const user = { id, email: respEmail, name: respName, role };
+
+      // Validate user data before storing
+      if (!isValidUser(user)) {
+        console.error("Invalid user data received from server:", user);
+        return {
+          success: false,
+          message: "Invalid user data received from server",
+        };
+      }
 
       // Save tokens and user to localStorage
       localStorage.setItem(STORAGE_TOKEN_KEY, access_token);
@@ -76,7 +96,17 @@ export const authApi = {
         role: "admin", // Default to admin for admin panel
       });
 
-      const { access_token, refresh_token, user } = response.data;
+      const { access_token, refresh_token, id, email: respEmail, name: respName, role } = response.data;
+      const user = { id, email: respEmail, name: respName, role };
+
+      // Validate user data before storing
+      if (!isValidUser(user)) {
+        console.error("Invalid user data received from server:", user);
+        return {
+          success: false,
+          message: "Invalid user data received from server",
+        };
+      }
 
       // Save tokens and user to localStorage
       localStorage.setItem(STORAGE_TOKEN_KEY, access_token);
@@ -147,10 +177,18 @@ export const authApi = {
 
       const response = await apiClient.get("/auth/me");
 
-      // Update local storage with fresh data from server
-      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(response.data));
+      // Extract user data - handle both nested and flat response formats
+      const userData = response.data.user || response.data;
+      
+      // Validate user data
+      if (!isValidUser(userData)) {
+        return { success: false, message: "Invalid user data from server" };
+      }
 
-      return { success: true, data: { user: response.data } };
+      // Update local storage with fresh data from server
+      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userData));
+
+      return { success: true, data: { user: userData } };
     } catch (error: any) {
       console.error("GetCurrentUser error:", error);
       return { success: false, message: error.response?.data?.detail || "Failed to get user" };
@@ -163,8 +201,15 @@ export const authApi = {
         email: newEmail,
         name: newName,
       });
-      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(response.data));
-      return { success: true, data: response.data };
+      
+      // Extract user data and validate
+      const userData = response.data.user || response.data;
+      if (isValidUser(userData)) {
+        localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userData));
+        return { success: true, data: userData };
+      } else {
+        return { success: false, message: "Invalid user data received" };
+      }
     } catch (error: any) {
       return {
         success: false,

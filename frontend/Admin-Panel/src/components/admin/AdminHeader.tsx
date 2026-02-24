@@ -22,8 +22,8 @@ export const AdminHeader = () => {
     <header className="bg-card/50 backdrop-blur-sm border-b border-border/50 px-6 py-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Welcome back </h2>
-
+          <h2 className="text-2xl font-bold text-foreground">Welcome back, {user?.name || "Admin"}!</h2>
+          {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
         </div>
 
         <div className="flex items-center gap-4">

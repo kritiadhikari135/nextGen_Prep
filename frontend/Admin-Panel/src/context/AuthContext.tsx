@@ -54,28 +54,56 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Set token state first
           setToken(storedToken);
 
-          // Always verify with backend on reload to ensure token is still valid
+          // Try to verify with backend on reload
           const response = await authApi.getCurrentUser();
 
-          if (response.success && response.data?.user) {
+          if (response.success && response.data?.user && typeof response.data.user === 'object' && !response.data.user.toString().includes("<!DOCTYPE")) {
             setUser(response.data.user);
-            console.log("Session verified and restored for:", response.data.user.email);
+            console.log("Session verified and restored for:", response.data.user?.name || response.data.user?.email);
           } else {
-            console.log("Session token invalid or expired");
-            logout(); // Clean up if validation fails
+            // Backend verification failed, try fallback to cached user
+            const storedUser = localStorage.getItem("authUser");
+            if (storedUser && !storedUser.includes("<!DOCTYPE")) {
+              try {
+                const cachedUser = JSON.parse(storedUser);
+                if (cachedUser?.id && (cachedUser?.name || cachedUser?.email)) {
+                  setUser(cachedUser);
+                  console.log("Session restored from cache:", cachedUser?.name || cachedUser?.email);
+                } else {
+                  throw new Error("Invalid cached user object");
+                }
+              } catch (e) {
+                console.log("Cached user data is invalid, clearing storage");
+                localStorage.removeItem("authUser");
+                logout();
+              }
+            } else {
+              console.log("Session token invalid or expired");
+              localStorage.removeItem("authUser"); // Clear corrupted cache
+              logout(); // Clean up if validation fails
+            }
           }
         } catch (error) {
           console.error("Auth initialization error:", error);
           // Try to recover from localStorage as fallback if server is down
           const storedUser = localStorage.getItem("authUser");
-          if (storedUser) {
+          if (storedUser && !storedUser.includes("<!DOCTYPE")) {
             try {
-              setUser(JSON.parse(storedUser));
-              console.log("Restored from cache (Offline mode)");
+              const cachedUser = JSON.parse(storedUser);
+              if (cachedUser?.id && (cachedUser?.name || cachedUser?.email)) {
+                setUser(cachedUser);
+                console.log("Restored from cache (Offline mode):", cachedUser?.name || cachedUser?.email);
+              } else {
+                throw new Error("Invalid cached user object");
+              }
             } catch (e) {
+              console.log("Cached user data is invalid, clearing storage");
+              localStorage.removeItem("authUser");
               logout();
             }
           } else {
+            console.log("Unable to restore session, clearing corrupted cache");
+            localStorage.removeItem("authUser");
             logout();
           }
         }
